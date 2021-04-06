@@ -33,7 +33,10 @@
 %   sampling_rate - sampling rate (in Hz) to resample the data to
 %   epoch_window - [start end] start and end times (in ms) relative to the
 %                   pulse_event from which to extract epochs
-%   ref_chan - the index of the reference channel for the data
+%   ref_chan - the index of the reference channel for the data. If the
+%               reference channel is not included in the data, pass an
+%               index greater than the number of channels. An additional
+%               channel will be added with zero at each time point.
 %   savecomps - 0|1 save the GSVD components in the CONTEEG and EpochEEG
 %                datasets. Defaults to 0 to save memory (components can be
 %                computed when needed)
@@ -140,6 +143,16 @@ EEG = pop_resample(EEG, sampling_rate);
 
 %Check for burst epochs
 [EEG, isburst] = eeg_checkburst(EEG, pulse_event);
+
+%Add zero data reference channel if not included in the dataset
+if ref_chan > EEG.nbchan
+    fprintf("Adding reference channel 'REF' to dataset\n");
+    EEG.data(end+1,:) = zeros(1, EEG.pnts);
+    EEG.nbchan = EEG.nbchan+1;
+    EEG = pop_chanedit(EEG, 'append', {EEG.nbchan 'REF' 0 0 0 0 0 0 0 0 [] [] [] 1});
+    EEG = eeg_checkset(EEG);
+    ref_chan = EEG.nbchan;
+end
 
 %Remove interpolated data
 EEG = pop_tesa_removedata(EEG, pulse_window, prepulse, pulse_event);
