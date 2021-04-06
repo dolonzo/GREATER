@@ -3,7 +3,9 @@
 % number of channels.
 %
 % INPUTS:
-%   INEEG1 - EEG dataset (as an eeglab EEG structure)
+%   INEEG1 - EEG dataset (as an eeglab EEG structure); alternatively, if
+%            passed alone, the ALLEEG structure. A pop-up window will allow
+%            selection of datasets within the ALLEEG structure.
 %   INEEG2 - EEG dataset (as an eeglab EEG structure)
 %   (optional) savecomps - [0|1] whether to save the GSVD components.
 %                          Defaults to not saving components to reduce data
@@ -28,6 +30,23 @@
 
 function [OUTEEG1, OUTEEG2] = pop_eeggsvd(INEEG1, INEEG2, savecomps, gsvd_chans)
 %GUI window (if we can get to it)
+if nargin == 1 %assume ALLEEG is passed
+    uilist = {...
+        {'Style', 'text', 'string', 'Index of first dataset'}...
+        {'Style', 'edit', 'string', '' 'tag' 'first'}...
+        {'Style', 'text', 'string', 'Index of second dataset'}...
+        {'Style', 'edit', 'string', '' 'tag' 'second'}...
+        {'Style', 'text', 'string', 'Channel indices to include in the GSVD'}...
+        {'Style', 'edit', 'string', '', 'tag', 'chans'}... 
+        {'Style', 'text', 'string', 'Save component activations?'}...
+        {'Style', 'checkbox', 'string', '' 'tag' 'save'}};
+    geometry = {[1, 0.5], [1, 0.5], [1, 0.5], [1, 0.5]};
+    [~, ~, ~, outstruct, ~] = inputgui('geometry', geometry, 'uilist', uilist, 'title', 'Calculate GSVD--pop_eeggsvd()');
+    if ~isempty(outstruct)
+        [OUTEEG1, OUTEEG2] = pop_eeggsvd(INEEG1(str2num(outstruct.first)), INEEG1(str2num(outstruct.second)), outstruct.save, str2num(outstruct.chans));
+    end
+    return
+end
 
 if INEEG1.nbchan ~= INEEG2.nbchan
     error('The datasets must contain the same number of channels')

@@ -27,11 +27,31 @@
 
 function [rej_comps, crit_value] = pop_rejgsvdcomps_amp(PulseEpoch, threshold, art_win)
 
+if nargin < 1
+    help pop_rejgsvdcomps_amp
+end
+
+if nargin < 2
+    geometry = {[1, 0.5], [1, 0.5]};
+    uilist = {...
+        {'Style', 'text', 'string', 'Rejection threshold'}...
+        {'Style', 'edit', 'string', '' 'tag' 'thresh'}...
+        {'Style', 'text', 'string', 'Post-pulse window endpoint (ms)'}...
+        {'Style', 'edit', 'string', '', 'tag', 'artwin'} };
+    [~, ~, ~, outstruct, ~] = inputgui('geometry', geometry, 'uilist', uilist, 'title', 'Post-pulse amplitude component rejection--pop_rejgsvdcomps_amp()');
+    if ~isempty(outstruct)
+        [rej_comps, crit_value] = pop_rejgsvdcomps_amp(PulseEpoch, str2num(outstruct.thresh), str2num(outstruct.artwin));
+    end
+    return
+end
+
 if ~isempty(PulseEpoch.gsvdcomp)
     gsvd_comp = PulseEpoch.gsvdcomp;
 else
     gsvd_comp = PulseEpoch.data(PulseEpoch.gsvdchans, :)'*inv(PulseEpoch.gsvdwts')*inv(PulseEpoch.gsvdsv);
 end
+
+fprintf('Calculating amplitude in post-pulse window...\n');
 
 componentERP = mean(reshape(diag(rms(PulseEpoch.gsvdwts))*(gsvd_comp*PulseEpoch.gsvdsv)', length(PulseEpoch.gsvdchans), PulseEpoch.pnts, PulseEpoch.trials), 3);
 startremoved = eeg_lat2point(PulseEpoch.tmscut(end).cutTimesTMS(1)*1e-3, 1, PulseEpoch.srate, [PulseEpoch.xmin, PulseEpoch.xmax], 1); %check if cut epochs maintain TMS removed window

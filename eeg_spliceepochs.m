@@ -5,7 +5,8 @@
 %
 % INPUTS:
 %   EEGIN - EEG dataset (as an eeglab EEG structure) containing EpochCut
-%           events from eeg_cutepochs
+%           events from eeg_cutepochs; else, if passed alone, ALLEEG
+%           structure containing both datasets from eeg_cutepochs
 %   EpochEEG - EEG dataset containing epoched EEG data produced using
 %              eeg_cutepochs
 %
@@ -22,6 +23,26 @@
 % Author: David Sorensen, 2020
 
 function EEGOUT = eeg_spliceepochs(EEGIN, EpochEEG)
+
+if nargin < 1
+    help eeg_spliceepochs
+    return
+end
+
+if nargin < 2
+    geometry = {[1, 0.5], [1, 0.5]};
+    uilist = {...
+        {'Style', 'text', 'string', 'Index of first dataset'}...
+        {'Style', 'edit', 'string', '' 'tag' 'first'}...
+        {'Style', 'text', 'string', 'Index of second dataset'}...
+        {'Style', 'edit', 'string', '' 'tag' 'second'} };
+    [~, ~, ~, outstruct, ~] = inputgui('geometry', geometry, 'uilist', uilist, 'title', 'Splice epochs back into continuous data--eeg_spliceepochs()');
+    if ~isempty(outstruct)
+        EEGOUT = eeg_spliceepochs(INEEG1(str2num(outstruct.first)), INEEG1(str2num(outstruct.second)));
+    end
+    return
+end
+
 %Find all the EpochCut events
 epochcuts = find(strcmp('EpochCut', {EEGIN.event(:).precut}));
 if isempty(epochcuts)
@@ -65,7 +86,7 @@ for ind = 1:length(epochs_to_insert)
     tmpevent = EpochEEG.event(epochevents);
     %Change the latencies of the events to match the latencies of the
     %continuous dataset
-    ceventlatencies = num2cell(latency + eeg_lat2point([EpochEEG.epoch(ind).eventlatency], 1, EpochEEG.srate, [EpochEEG.xmin*1000 EpochEEG.xmax*1000], .001)); 
+    ceventlatencies = num2cell(latency + eeg_lat2point([EpochEEG.epoch(ind).eventlatency], 1, EpochEEG.srate, [EpochEEG.xmin*1000 EpochEEG.xmax*1000], .001));
     [tmpevent.latency] = ceventlatencies{:};
     %Remove the epoch field from the event structure to make it compatible
     %with continuous data event structure
@@ -83,18 +104,18 @@ end
 %Delete the EpochCut events once they have been replaced
 EEGOUT.event(epochcuts(epochs_to_insert)) = [];
 notspliced = find(strcmp('EpochCut', {EEGOUT.event(:).precut}));
-if ~isempty(notspliced) 
-    [EEGOUT.event(notspliced).precut] = deal('NonSplicedCut'); 
+if ~isempty(notspliced)
+    [EEGOUT.event(notspliced).precut] = deal('NonSplicedCut');
 end
 oldepochcuts = find(contains({EEGOUT.event(:).precut}, 'OldEpochCut'));
 if ~isempty(oldepochcuts)
     extractfunc = @(a) extractAfter(a, 'Old');
     paredepochcuts = cellfun(extractfunc, {EEGOUT.event(oldepochcuts).precut}, 'UniformOutput', false);
-    [EEGOUT.event(oldepochcuts).precut] = paredepochcuts{:}; 
+    [EEGOUT.event(oldepochcuts).precut] = paredepochcuts{:};
 end
 EEGOUT.data = data;
 EEGOUT.pnts = length(EEGOUT.data);
 EEGOUT = eeg_checkset(EEGOUT);
 EEGOUT = eeg_checkset(EEGOUT, 'eventconsistency');
 
-%Errors after resampling
+end

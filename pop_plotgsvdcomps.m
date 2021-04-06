@@ -28,7 +28,7 @@ else
     gsvd_data = diag(rms(EEG1.gsvdwts))*(gsvdcomps*EEG1.gsvdsv)';
 end
 
-eegplot(gsvd_data, 'srate', EEG1.srate, 'events', EEG1.event, varargin{:});
+eegplot(gsvd_data, 'srate', EEG1.srate, 'events', EEG1.event, varargin{:}, 'title', 'GSVD components');
 
 end
 
