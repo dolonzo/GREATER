@@ -32,6 +32,7 @@ function rej_comps = pop_rejgsvdcomps_gsv(INEEG1,INEEG2, threshold)
 
 if nargin < 1
     help pop_rejgsvdcomps_gsv
+    return
 end
 
 if nargin == 1
