@@ -29,6 +29,12 @@
 % Author: David Sorensen, 2021
 
 function [OUTEEG1, OUTEEG2] = pop_eeggsvd(INEEG1, INEEG2, savecomps, gsvd_chans)
+
+if nargin < 1
+    help pop_eeggsvd
+    return
+end
+
 %GUI window (if we can get to it)
 if nargin == 1 %assume ALLEEG is passed
     uilist = {...
