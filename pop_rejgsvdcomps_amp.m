@@ -29,6 +29,7 @@ function [rej_comps, crit_value] = pop_rejgsvdcomps_amp(PulseEpoch, threshold, a
 
 if nargin < 1
     help pop_rejgsvdcomps_amp
+    return
 end
 
 if nargin < 2
