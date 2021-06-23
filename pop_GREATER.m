@@ -95,6 +95,7 @@ function [OUTEEG, CONTEEG, EpochEEG] = pop_GREATER(EEG, pulse_event, pulse_windo
 
 if nargin < 1
     help pop_GREATER
+    return
 end
 
 if nargin < 2
