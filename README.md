@@ -10,7 +10,7 @@
        6. Reject bad portions of data from Intertrain Interval data based
        on FASTER criteria
        7. Compute the Generalized Singular Value Decomposition (GSVD)
-       jointly on the Intetrain Interval data and the TMS Pulse epochs
+       jointly on the Intertrain Interval data and the TMS Pulse epochs
        8. (Optionally) Plot the components
        9. (Optionally) Reject artifactual GSVD components from the
        dataset. This can be done based on amplitude in a post-pulse
